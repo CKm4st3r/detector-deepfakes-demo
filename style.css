@@ -1,61 +1,33 @@
-/* HERO background */
-#heroBg {
-  background-image: url('assets/hero.jpg'); /* change with your image */
-  background-size: cover;
-  background-position: center;
-  filter: saturate(1.05);
+
+/* Reusable buttons */
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition;
 }
 
-/* Main button */
-.verify-btn {
-  @apply rounded-full px-6 py-3 font-bold text-white;
-  background: linear-gradient(90deg,#7c3aed,#ec4899);
-  box-shadow: 0 6px 18px rgba(124,58,237,0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.btn-secondary {
+  @apply px-3 py-1 border rounded text-sm hover:bg-gray-200 transition;
 }
-.verify-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 22px rgba(124,58,237,0.35);
+
+/* Section titles and boxes */
+.section-title {
+  @apply text-lg font-semibold mb-2;
+}
+
+.section-box {
+  @apply bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700;
+}
+
+/* Pricing cards */
+.card {
+  @apply bg-white p-4 rounded-lg shadow-sm text-center;
+}
+
+.price {
+  @apply block mt-2 font-bold text-blue-600;
 }
 
 /* Progress bar */
 #progressBar {
-  background: linear-gradient(90deg,#06b6d4,#7c3aed);
-  transition: width 250ms linear;
+  background: linear-gradient(90deg, #6366f1, #9333ea);
+  width: 0%;
 }
-
-/* Result badges */
-#resultBadge.deep {
-  background: linear-gradient(90deg,#ef4444,#b91c1c);
-}
-#resultBadge.ok {
-  background: linear-gradient(90deg,#10b981,#059669);
-}
-
-/* Cards */
-.card-hero {
-  height: 340px;
-  border-radius: 8px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-}
-.card-hero::before {
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
-  transition: transform .4s ease;
-}
-.card-hero .card-overlay {
-  position:relative; z-index:2;
-  padding: 24px;
-}
-.card-hero:hover::before { transform: translateY(-6px); }
-
-@media (max-width:768px){
-  .card-hero { height: 220px; }
-}
-
