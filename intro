@@ -1,0 +1,403 @@
+<!--
+  index.html - "Detecto de deepfakes" (Demo, enhanced)
+  Single-file static webpage for GitHub Pages. No backend required.
+
+  This enhanced version includes:
+  - Language toggle (ES / EN)
+  - Predefined response profiles (e.g., 10% Deepfake, 90% Legit)
+  - Button to copy a shareable URL that encodes the result
+  - Simulation of an "upload to bucket" or an API call (frontend-only, fake)
+
+  Deployment (quick):
+  1. Create a new public GitHub repository (e.g., "detecto-deepfakes-demo").
+  2. Add this index.html to the repository root and commit.
+  3. Go to the repo Settings > Pages and choose branch: main (root) -> Save.
+  4. After a minute, your site will be available at https://<your-username>.github.io/<repo-name>/
+
+  Notes: This page DOES NOT analyze videos. It only simulates an upload and returns a controlled random "Legítimo / Deepfake" result for demonstration.
+-->
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detecto de deepfakes — Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Demo: detecto de deepfakes (simulación)">
+</head>
+<body class="bg-gray-50 text-gray-800 leading-relaxed">
+  <header class="bg-white shadow">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold" data-i18n="title">Detecto de deepfakes</h1>
+      <nav class="space-x-4 text-sm">
+        <a href="#dashboard" class="hover:underline" data-i18n="nav_dashboard">Dashboard</a>
+        <a href="#quienes" class="hover:underline" data-i18n="nav_quienes">Quiénes somos</a>
+        <a href="#empresas" class="hover:underline" data-i18n="nav_empresas">Empresas</a>
+        <a href="#hogar" class="hover:underline" data-i18n="nav_hogar">Hogar</a>
+        <a href="#compra" class="hover:underline" data-i18n="nav_compra">Compra</a>
+        <a href="#planes" class="hover:underline" data-i18n="nav_planes">Planes y Precios</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+    <!-- Dashboard -->
+    <section id="dashboard" class="mb-12">
+      <div class="bg-white rounded-2xl shadow p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-semibold mb-4" data-i18n="dashboard_title">Demo: Subir video para análisis</h2>
+            <p class="text-sm text-gray-600 mb-4" data-i18n="dashboard_note">Este sitio es una demostración. No realiza análisis reales; la respuesta se genera aleatoriamente para mostrar la interfaz.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label class="text-sm">ES / EN</label>
+            <select id="langSel" class="border rounded px-2 py-1 text-sm">
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 items-start mt-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="select_video">Selecciona un video</label>
+            <input id="videoInput" type="file" accept="video/*" class="block w-full text-sm text-gray-600" />
+
+            <div id="previewWrap" class="mt-4 hidden">
+              <video id="preview" controls class="w-full rounded-lg shadow-sm"></video>
+            </div>
+
+            <div class="mt-4">
+              <label class="text-sm font-medium">Perfil de demo</label>
+              <div class="mt-2 text-sm text-gray-700 space-y-2">
+                <label class="inline-flex items-center gap-2"><input type="radio" name="profile" value="default" checked> <span data-i18n="profile_default">Por defecto (~45% Deepfake)</span></label>
+                <label class="inline-flex items-center gap-2"><input type="radio" name="profile" value="10deep"> <span data-i18n="profile_10">Demo: 10% Deepfake / 90% Legítimo</span></label>
+                <label class="inline-flex items-center gap-2"><input type="radio" name="profile" value="50deep"> <span data-i18n="profile_50">Demo: 50% Deepfake / 50% Legítimo</span></label>
+                <label class="inline-flex items-center gap-2"><input type="radio" name="profile" value="custom"> <span data-i18n="profile_custom">Personalizado</span></label>
+                <div id="customProfile" class="mt-2 hidden text-xs text-gray-600">
+                  <label class="block">% Deepfake: <input id="customPercent" type="number" min="0" max="100" value="45" class="w-20 ml-2 border rounded px-2 py-1 text-sm" /></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-3">
+              <button id="analyzeBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" data-i18n="analyze">Analizar</button>
+              <button id="resetBtn" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300" data-i18n="reset">Reset</button>
+            </div>
+
+            <div id="progressWrap" class="mt-4 hidden">
+              <div class="text-sm text-gray-600 mb-2" data-i18n="analyzing">Analizando...</div>
+              <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div id="progressBar" class="h-3 rounded-full transition-all" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div id="resultWrap" class="mt-6 hidden p-4 rounded-lg border">
+              <div id="resultBadge" class="inline-block px-3 py-1 rounded-full font-semibold"></div>
+              <p id="resultText" class="mt-2 text-sm"></p>
+              <div id="confidence" class="mt-2 text-xs text-gray-600"></div>
+
+              <div class="mt-4 flex gap-2">
+                <button id="copyUrlBtn" class="px-3 py-1 border rounded text-sm" data-i18n="copy_url">Copiar URL de resultado</button>
+                <button id="openUrlBtn" class="px-3 py-1 border rounded text-sm" data-i18n="open_url">Abrir resultado</button>
+                <button id="simulateUploadBtn" class="px-3 py-1 border rounded text-sm" data-i18n="simulate_upload">Simular subida (bucket/API)</button>
+              </div>
+
+              <div id="uploadResult" class="mt-3 text-xs text-gray-600"></div>
+            </div>
+
+          </div>
+
+          <div class="bg-gray-50 p-4 rounded-lg border">
+            <h3 class="font-medium" data-i18n="how_it_works">Cómo funciona (demo)</h3>
+            <ul class="mt-2 text-sm text-gray-600 list-disc pl-5 space-y-1">
+              <li data-i18n="li_upload">Sube un video (no se envía a ningún servidor por defecto).</li>
+              <li data-i18n="li_click">Pulsa <strong>Analizar</strong> para ver la simulación.</li>
+              <li data-i18n="li_random">El resultado se decide según el perfil seleccionado (simulación).</li>
+            </ul>
+            <p class="mt-3 text-xs text-gray-500" data-i18n="real_note">Para pruebas reales necesitarás un backend y modelos de detección.</p>
+
+            <hr class="my-3">
+
+            <h4 class="font-semibold text-sm mb-2" data-i18n="api_title">Simulación de API / Bucket</h4>
+            <p class="text-xs text-gray-600" data-i18n="api_note">Puedes simular una llamada a una API o la generación de un URL de subida a un bucket. Todo se hace localmente y no se envían datos reales.</p>
+
+            <div class="mt-3 text-sm">
+              <label class="inline-flex items-center gap-2"><input type="checkbox" id="simulateApiChk"> <span data-i18n="simulate_api">Simular llamada API</span></label>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Other sections -->
+    <section id="quienes" class="mb-8">
+      <h3 class="text-lg font-semibold mb-2" data-i18n="who_title">Quiénes somos</h3>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700">
+        <p data-i18n="who_text">Somos un equipo demo que explora ideas de detección de contenido manipulado. Esta página es una maqueta para presentaciones.</p>
+      </div>
+    </section>
+
+    <section id="empresas" class="mb-8">
+      <h3 class="text-lg font-semibold mb-2" data-i18n="companies">Empresas</h3>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700">
+        <p data-i18n="companies_text">Ofrecemos integraciones de prueba para empresas interesadas en detectar deepfakes en su contenido multimedia (demo).</p>
+      </div>
+    </section>
+
+    <section id="hogar" class="mb-8">
+      <h3 class="text-lg font-semibold mb-2" data-i18n="home">Hogar</h3>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700">
+        <p data-i18n="home_text">Soluciones para usuarios domésticos: comprobar rápidamente vídeos compartidos. (Interfaz de demostración.)</p>
+      </div>
+    </section>
+
+    <section id="compra" class="mb-8">
+      <h3 class="text-lg font-semibold mb-2" data-i18n="buy">Compra</h3>
+      <div class="bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700">
+        <p data-i18n="buy_text">En la versión real se podrían ofrecer servicios por suscripción o análisis por petición. Aquí solo mostramos ejemplos.</p>
+      </div>
+    </section>
+
+    <section id="planes" class="mb-12">
+      <h3 class="text-lg font-semibold mb-4" data-i18n="plans">Planes y Precios</h3>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold" data-i18n="plan_free">Free (Demo)</h4>
+          <p class="text-sm text-gray-600 mt-2" data-i18n="plan_free_text">Acceso a la demo — resultados aleatorios.</p>
+          <div class="mt-4 text-sm font-bold">Gratis</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm border-2 border-blue-100">
+          <h4 class="font-semibold" data-i18n="plan_starter">Starter (Ideal para pruebas)</h4>
+          <p class="text-sm text-gray-600 mt-2" data-i18n="plan_starter_text">Incluye pruebas y asesoramiento (demo).</p>
+          <div class="mt-4 text-sm font-bold">€9 / mes</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="font-semibold" data-i18n="plan_enterprise">Empresa</h4>
+          <p class="text-sm text-gray-600 mt-2" data-i18n="plan_enterprise_text">Integración y soporte personalizado (demo).</p>
+          <div class="mt-4 text-sm font-bold">Contactar</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs text-gray-500 py-6">Demo — Esta página no realiza análisis reales. © Detecto de deepfakes (demo)</footer>
+  </main>
+
+  <script>
+    // Simple i18n dictionary
+    const I18N = {
+      es: {
+        title: 'Detecto de deepfakes', nav_dashboard: 'Dashboard', nav_quienes: 'Quiénes somos', nav_empresas: 'Empresas', nav_hogar: 'Hogar', nav_compra: 'Compra', nav_planes: 'Planes y Precios',
+        dashboard_title: 'Demo: Subir video para análisis', dashboard_note: 'Esta página es una demostración. No realiza análisis reales; la respuesta se genera aleatoriamente para mostrar la interfaz.',
+        select_video: 'Selecciona un video', analyze: 'Analizar', reset: 'Reset', analyzing: 'Analizando...',
+        profile_default: 'Por defecto (~45% Deepfake)', profile_10: 'Demo: 10% Deepfake / 90% Legítimo', profile_50: 'Demo: 50% Deepfake / 50% Legítimo', profile_custom: 'Personalizado',
+        copy_url: 'Copiar URL de resultado', open_url: 'Abrir resultado', simulate_upload: 'Simular subida (bucket/API)', how_it_works: 'Cómo funciona (demo)', li_upload: 'Sube un video (no se envía a ningún servidor por defecto).', li_click: 'Pulsa Analizar para ver la simulación.', li_random: 'El resultado se decide según el perfil seleccionado (simulación).', real_note: 'Para pruebas reales necesitarás un backend y modelos de detección.',
+        who_title: 'Quiénes somos', who_text: 'Somos un equipo demo que explora ideas de detección de contenido manipulado. Esta página es una maqueta para presentaciones.',
+        companies: 'Empresas', companies_text: 'Ofrecemos integraciones de prueba para empresas interesadas en detectar deepfakes en su contenido multimedia (demo).',
+        home: 'Hogar', home_text: 'Soluciones para usuarios domésticos: comprobar rápidamente vídeos compartidos. (Interfaz de demostración.)',
+        buy: 'Compra', buy_text: 'En la versión real se podrían ofrecer servicios por suscripción o análisis por petición. Aquí solo mostramos ejemplos.',
+        plans: 'Planes y Precios', plan_free: 'Free (Demo)', plan_free_text: 'Acceso a la demo — resultados aleatorios.', plan_starter: 'Starter (Ideal para pruebas)', plan_starter_text: 'Incluye pruebas y asesoramiento (demo).', plan_enterprise: 'Empresa', plan_enterprise_text: 'Integración y soporte personalizado (demo).',
+        api_title: 'Simulación de API / Bucket', api_note: 'Puedes simular una llamada a una API o la generación de un URL de subida a un bucket. Todo se hace localmente y no se envían datos reales.', simulate_api: 'Simular llamada API'
+      },
+      en: {
+        title: 'Deepfake Detector', nav_dashboard: 'Dashboard', nav_quienes: 'About', nav_empresas: 'Business', nav_hogar: 'Home', nav_compra: 'Buy', nav_planes: 'Plans & Pricing',
+        dashboard_title: 'Demo: Upload a video for analysis', dashboard_note: 'This site is a demo. It does not perform real analysis; the result is randomly generated to showcase the UI.',
+        select_video: 'Choose a video', analyze: 'Analyze', reset: 'Reset', analyzing: 'Analyzing...',
+        profile_default: 'Default (~45% Deepfake)', profile_10: 'Demo: 10% Deepfake / 90% Legit', profile_50: 'Demo: 50% Deepfake / 50% Legit', profile_custom: 'Custom',
+        copy_url: 'Copy result URL', open_url: 'Open result', simulate_upload: 'Simulate upload (bucket/API)', how_it_works: 'How it works (demo)', li_upload: 'Upload a video (nothing is sent to a server by default).', li_click: 'Click Analyze to see the simulation.', li_random: 'The result is decided according to the chosen profile (simulation).', real_note: 'For real tests you would need a backend and detection models.',
+        who_title: 'About', who_text: 'We are a demo team exploring ideas to detect manipulated content. This page is a mockup for presentations.',
+        companies: 'Business', companies_text: 'We provide test integrations for companies interested in detecting deepfakes in their multimedia (demo).',
+        home: 'Home', home_text: 'Solutions for home users: quickly check shared videos. (Demo UI.)',
+        buy: 'Buy', buy_text: 'In a real product we could offer subscription services or on-demand analysis. Here we only show examples.',
+        plans: 'Plans & Pricing', plan_free: 'Free (Demo)', plan_free_text: 'Access to the demo — random results.', plan_starter: 'Starter (Good for testing)', plan_starter_text: 'Includes testing and guidance (demo).', plan_enterprise: 'Enterprise', plan_enterprise_text: 'Integration and custom support (demo).',
+        api_title: 'API / Bucket simulation', api_note: 'You can simulate a call to an API or the generation of an upload URL to a bucket. Everything runs locally and no real data is sent.', simulate_api: 'Simulate API call'
+      }
+    };
+
+    function setLang(l){
+      document.documentElement.lang = (l === 'en') ? 'en' : 'es';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[l] && I18N[l][key]) el.textContent = I18N[l][key];
+      });
+    }
+
+    // Initialize
+    const langSel = document.getElementById('langSel');
+    langSel.addEventListener('change', (e)=> setLang(e.target.value));
+    setLang('es');
+
+    // Elements
+    const videoInput = document.getElementById('videoInput');
+    const preview = document.getElementById('preview');
+    const previewWrap = document.getElementById('previewWrap');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressBar = document.getElementById('progressBar');
+    const resultWrap = document.getElementById('resultWrap');
+    const resultBadge = document.getElementById('resultBadge');
+    const resultText = document.getElementById('resultText');
+    const confidence = document.getElementById('confidence');
+    const copyUrlBtn = document.getElementById('copyUrlBtn');
+    const openUrlBtn = document.getElementById('openUrlBtn');
+    const simulateUploadBtn = document.getElementById('simulateUploadBtn');
+    const simulateApiChk = document.getElementById('simulateApiChk');
+    const customProfile = document.getElementById('customProfile');
+    const customPercent = document.getElementById('customPercent');
+
+    let currentFile = null;
+    let lastResult = null; // {isDeepfake, conf, label}
+
+    videoInput.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      currentFile = f;
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      previewWrap.classList.remove('hidden');
+      resultWrap.classList.add('hidden');
+    });
+
+    // profile controls
+    document.querySelectorAll('input[name="profile"]').forEach(r => {
+      r.addEventListener('change', (e)=>{
+        if (e.target.value === 'custom') customProfile.classList.remove('hidden');
+        else customProfile.classList.add('hidden');
+      });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      videoInput.value = '';
+      preview.src = '';
+      previewWrap.classList.add('hidden');
+      resultWrap.classList.add('hidden');
+      progressWrap.classList.add('hidden');
+      progressBar.style.width = '0%';
+      currentFile = null;
+      lastResult = null;
+      document.getElementById('uploadResult').textContent = '';
+    });
+
+    function getProfilePercent(){
+      const v = document.querySelector('input[name="profile"]:checked').value;
+      if (v === '10deep') return 10;
+      if (v === '50deep') return 50;
+      if (v === 'custom') return Math.max(0, Math.min(100, Number(customPercent.value) || 45));
+      return 45; // default
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+      if (!currentFile) {
+        alert('Selecciona un video primero (esto es solo demo).');
+        return;
+      }
+
+      // Show fake progress
+      progressWrap.classList.remove('hidden');
+      progressBar.style.width = '2%';
+      resultWrap.classList.add('hidden');
+
+      let progress = 2;
+      const interval = setInterval(() => {
+        progress += Math.random() * 12;
+        if (progress >= 98) progress = 98;
+        progressBar.style.width = progress.toFixed(0) + '%';
+      }, 400);
+
+      const fakeAnalysisTime = 2200 + Math.random() * 2600;
+      setTimeout(() => {
+        clearInterval(interval);
+        progressBar.style.width = '100%';
+
+        const deepPct = getProfilePercent();
+        const rnd = Math.random() * 100;
+        const isDeepfake = rnd < deepPct; // use profile
+        const conf = Math.floor(60 + Math.random() * 40);
+
+        lastResult = {isDeepfake, conf, label: isDeepfake ? (document.documentElement.lang === 'en' ? 'Deepfake (simulated)' : 'Deepfake (simulado)') : (document.documentElement.lang === 'en' ? 'Legit (simulated)' : 'Legítimo (simulado)')};
+
+        resultWrap.classList.remove('hidden');
+        progressWrap.classList.add('hidden');
+
+        if (isDeepfake) {
+          resultBadge.textContent = lastResult.label;
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-red-100 text-red-800';
+          resultText.textContent = document.documentElement.lang === 'en' ? 'The video has features this demo considers manipulated. (Random demo result.)' : 'El video tiene características que este demo considera manipuladas. (Resultado aleatorio — demo.)';
+        } else {
+          resultBadge.textContent = lastResult.label;
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-green-100 text-green-800';
+          resultText.textContent = document.documentElement.lang === 'en' ? 'The video appears authentic according to this demo. (Random demo result.)' : 'El video parece auténtico según este demo. (Resultado aleatorio — demo.)';
+        }
+
+        confidence.textContent = (document.documentElement.lang === 'en' ? 'Estimated confidence (simulated): ' : 'Confianza estimada (simulada): ') + conf + '%';
+
+      }, fakeAnalysisTime);
+    });
+
+    // Copy URL: encode result in query params
+    copyUrlBtn.addEventListener('click', ()=>{
+      if (!lastResult) return alert('No hay resultado para compartir.');
+      const params = new URLSearchParams({r: lastResult.isDeepfake ? 'deep' : 'legit', c: lastResult.conf});
+      const shareUrl = location.origin + location.pathname + '?' + params.toString();
+      navigator.clipboard.writeText(shareUrl).then(()=>{
+        alert((document.documentElement.lang === 'en') ? 'Result URL copied to clipboard' : 'URL de resultado copiada al portapapeles');
+      }).catch(()=> alert('Could not copy automatically — selecciona y copia manualmente: ' + shareUrl));
+    });
+
+    openUrlBtn.addEventListener('click', ()=>{
+      if (!lastResult) return alert('No hay resultado para abrir.');
+      const params = new URLSearchParams({r: lastResult.isDeepfake ? 'deep' : 'legit', c: lastResult.conf});
+      const shareUrl = location.origin + location.pathname + '?' + params.toString();
+      window.open(shareUrl, '_blank');
+    });
+
+    // If page was opened with query params, show them (handy for shared links)
+    window.addEventListener('load', ()=>{
+      const qs = new URLSearchParams(location.search);
+      if (qs.has('r')){
+        const r = qs.get('r');
+        const c = qs.get('c') || '';
+        const isDeepfake = (r === 'deep');
+        lastResult = {isDeepfake, conf: c, label: isDeepfake ? (document.documentElement.lang === 'en' ? 'Deepfake (simulated)' : 'Deepfake (simulado)') : (document.documentElement.lang === 'en' ? 'Legit (simulated)' : 'Legítimo (simulado)')};
+        resultWrap.classList.remove('hidden');
+        if (isDeepfake){
+          resultBadge.textContent = lastResult.label; resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-red-100 text-red-800';
+          resultText.textContent = document.documentElement.lang === 'en' ? 'The video has features this demo considers manipulated. (Shared result.)' : 'El video tiene características que este demo considera manipuladas. (Resultado compartido.)';
+        } else {
+          resultBadge.textContent = lastResult.label; resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-green-100 text-green-800';
+          resultText.textContent = document.documentElement.lang === 'en' ? 'The video appears authentic according to this demo. (Shared result.)' : 'El video parece auténtico según este demo. (Resultado compartido.)';
+        }
+        confidence.textContent = (document.documentElement.lang === 'en' ? 'Estimated confidence (simulated): ' : 'Confianza estimada (simulada): ') + c + '%';
+      }
+    });
+
+    // Simulate upload to bucket / API
+    simulateUploadBtn.addEventListener('click', ()=>{
+      if (!lastResult) return alert('Genera primero un resultado con Analizar.');
+      const out = document.getElementById('uploadResult');
+      out.textContent = '';
+
+      if (simulateApiChk.checked){
+        out.textContent = (document.documentElement.lang === 'en' ? 'Simulating API call...' : 'Simulando llamada a API...');
+        // fake fetch (no file sent) — purely frontend simulation
+        setTimeout(()=>{
+          const fakeResp = {status: 'ok', id: 'demo-' + Math.random().toString(36).slice(2,9), uploadedTo: 'https://bucket-demo.s3.example/' + encodeURIComponent((currentFile && currentFile.name) || 'no-file.mp4'), result: lastResult.isDeepfake ? 'deep' : 'legit'};
+          out.innerHTML = (document.documentElement.lang === 'en' ? 'API response (simulated): ' : 'Respuesta API (simulada): ') + JSON.stringify(fakeResp);
+        }, 900 + Math.random()*800);
+      } else {
+        out.textContent = (document.documentElement.lang === 'en' ? 'Simulating bucket URL generation...' : 'Simulando generación de URL de bucket...');
+        setTimeout(()=>{
+          const fakeUrl = 'https://storage-demo.example/' + encodeURIComponent((currentFile && currentFile.name) || 'no-file.mp4') + '?signed=demo-' + Math.random().toString(36).slice(2,8);
+          out.innerHTML = (document.documentElement.lang === 'en' ? 'Generated bucket URL (simulated): ' : 'URL de bucket generado (simulado): ') + '<br><a href="' + fakeUrl + '" target="_blank" class="text-blue-600 underline">' + fakeUrl + '</a>';
+        }, 600 + Math.random()*600);
+      }
+    });
+
+  </script>
+</body>
+</html>
