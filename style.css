@@ -1,0 +1,32 @@
+/* Botones reutilizables */
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition;
+}
+
+.btn-secondary {
+  @apply px-3 py-1 border rounded text-sm hover:bg-gray-200 transition;
+}
+
+/* Secciones */
+.section-title {
+  @apply text-lg font-semibold mb-2;
+}
+
+.section-box {
+  @apply bg-white p-4 rounded-lg shadow-sm text-sm text-gray-700;
+}
+
+/* Tarjetas precios */
+.card {
+  @apply bg-white p-4 rounded-lg shadow-sm text-center;
+}
+
+.price {
+  @apply block mt-2 font-bold text-blue-600;
+}
+
+/* Barra de progreso */
+#progressBar {
+  background: linear-gradient(90deg, #6366f1, #9333ea);
+  width: 0%;
+}
