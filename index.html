@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Deepfake Detector — Demo</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -66,15 +67,81 @@
         </div>
       </div>
     </section>
+
+    <!-- CARDS -->
+    <section class="mt-16 grid md:grid-cols-3 gap-6">
+      <article class="card-hero" data-img="assets/img1.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">AI Solutions</h3>
+          <p class="text-white/90 mt-2 text-sm">Editable descriptive text.</p>
+        </div>
+      </article>
+      <article class="card-hero" data-img="assets/img2.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">Projects</h3>
+          <p class="text-white/90 mt-2 text-sm">Editable descriptive text.</p>
+        </div>
+      </article>
+      <article class="card-hero" data-img="assets/img3.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">Research</h3>
+          <p class="text-white/90 mt-2 text-sm">Editable descriptive text.</p>
+        </div>
+      </article>
+    </section>
   </main>
 
+  <!-- FOOTER CORPORATE -->
   <footer class="bg-gray-900 text-gray-300 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-6 text-center text-sm text-gray-400">
-      © 2025 Deepfake Detector Demo — All rights reserved.
+    <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <!-- Column 1 -->
+      <div>
+        <h3 class="text-white text-xl font-bold">Deepfake Detector</h3>
+        <p class="mt-3 text-sm text-gray-400">
+          Corporate demo showcasing deepfake detection. Results are simulated for presentation purposes.
+        </p>
+      </div>
+
+      <!-- Column 2 -->
+      <div>
+        <h4 class="text-white font-semibold mb-3">Navigation</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#verifier" class="hover:underline">Verifier</a></li>
+          <li><a href="#plans" class="hover:underline">Plans</a></li>
+          <li><a href="#contact" class="hover:underline">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3 -->
+      <div>
+        <h4 class="text-white font-semibold mb-3">Resources</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:underline">Blog</a></li>
+          <li><a href="#" class="hover:underline">Research</a></li>
+          <li><a href="#" class="hover:underline">FAQs</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4 -->
+      <div>
+        <h4 class="text-white font-semibold mb-3">Contact</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="mailto:info@demo.com" class="hover:underline">info@demo.com</a></li>
+          <li><a href="#" class="hover:underline">LinkedIn</a></li>
+          <li><a href="#" class="hover:underline">Twitter</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="border-t border-gray-700 text-center py-4 text-xs text-gray-500">
+      © 2025 Deepfake Detector — Corporate Demo. All rights reserved.
     </div>
   </footer>
 
   <script src="app.js"></script>
 </body>
 </html>
+
 
