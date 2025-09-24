@@ -1,88 +1,61 @@
-// Elements
-const fakeInput = document.getElementById('fakeInput');
-const fileInput = document.getElementById('fileInput');
-const verifyBtn = document.getElementById('verifyBtn');
-const previewBox = document.getElementById('previewBox');
-const progressArea = document.getElementById('progressArea');
-const progressBar = document.getElementById('progressBar');
-const resultArea = document.getElementById('resultArea');
-const resultBadge = document.getElementById('resultBadge');
-const resultConf = document.getElementById('resultConf');
-const resultMsg = document.getElementById('resultMsg');
-
-// Hero background (optional)
-if (document.getElementById('heroBg')) {
-  document.getElementById('heroBg').style.backgroundImage = "url('assets/hero.jpg')";
+/* HERO background */
+#heroBg {
+  background-image: url('assets/hero.jpg'); /* change with your image */
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05);
 }
 
-// Click on visible box → open file input
-fakeInput.addEventListener('click', () => {
-  fileInput.click();
-});
+/* Main button */
+.verify-btn {
+  @apply rounded-full px-6 py-3 font-bold text-white;
+  background: linear-gradient(90deg,#7c3aed,#ec4899);
+  box-shadow: 0 6px 18px rgba(124,58,237,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.verify-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(124,58,237,0.35);
+}
 
-// When file selected
-fileInput.addEventListener('change', (e) => {
-  const f = e.target.files[0];
-  if (!f) return;
+/* Progress bar */
+#progressBar {
+  background: linear-gradient(90deg,#06b6d4,#7c3aed);
+  transition: width 250ms linear;
+}
 
-  fakeInput.textContent = `Selected file: ${f.name}`;
-  previewBox.innerHTML = `<div class="text-sm text-gray-600">Uploading file...</div>`;
+/* Result badges */
+#resultBadge.deep {
+  background: linear-gradient(90deg,#ef4444,#b91c1c);
+}
+#resultBadge.ok {
+  background: linear-gradient(90deg,#10b981,#059669);
+}
 
-  setTimeout(() => {
-    previewBox.innerHTML = `<video src="${URL.createObjectURL(f)}" controls class="w-full h-full object-cover"></video>`;
-    setTimeout(() => {
-      startAnalysis();
-    }, 600);
-  }, 1200);
-});
+/* Cards */
+.card-hero {
+  height: 340px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+.card-hero::before {
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+  transition: transform .4s ease;
+}
+.card-hero .card-overlay {
+  position:relative; z-index:2;
+  padding: 24px;
+}
+.card-hero:hover::before { transform: translateY(-6px); }
 
-// Verify button
-verifyBtn.addEventListener('click', () => {
-  if (fileInput.files && fileInput.files.length > 0) {
-    startAnalysis();
-  } else {
-    fileInput.click();
-  }
-});
-
-// Simulated analysis
-function startAnalysis() {
-  resultArea.classList.add('hidden');
-  progressArea.classList.remove('hidden');
-  progressBar.style.width = '2%';
-
-  let progress = 2;
-  const interval = setInterval(() => {
-    progress += Math.random() * 10;
-    if (progress >= 98) progress = 98;
-    progressBar.style.width = progress.toFixed(0) + '%';
-  }, 300);
-
-  const fakeTime = 2000 + Math.random() * 2000;
-  setTimeout(() => {
-    clearInterval(interval);
-    progressBar.style.width = '100%';
-
-    const rnd = Math.random() * 100;
-    const isDeepfake = rnd < 90;
-    const conf = isDeepfake 
-      ? Math.floor(80 + Math.random() * 18) 
-      : Math.floor(65 + Math.random() * 25);
-
-    progressArea.classList.add('hidden');
-    resultArea.classList.remove('hidden');
-
-    if (isDeepfake) {
-      resultBadge.textContent = 'DEEPFAKE (simulated)';
-      resultBadge.className = 'deep inline-block px-4 py-2 rounded-full font-semibold text-white text-lg';
-      resultConf.textContent = `Confidence: ${conf}%`;
-      resultMsg.textContent = 'The system considers this video manipulated (simulation).';
-    } else {
-      resultBadge.textContent = 'ORIGINAL VIDEO (simulated)';
-      resultBadge.className = 'ok inline-block px-4 py-2 rounded-full font-semibold text-white text-lg';
-      resultConf.textContent = `Confidence: ${conf}%`;
-      resultMsg.textContent = 'The system considers this video authentic (simulation).';
-    }
-  }, fakeTime);
+@media (max-width:768px){
+  .card-hero { height: 220px; }
 }
 
