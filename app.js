@@ -31,24 +31,24 @@ fileInput.addEventListener('change', (e) => {
   const f = e.target.files[0];
   if (!f) return;
 
-  // Mostrar nombre en la caja (feedback)
+  // Mostrar nombre en la caja
   fakeInput.textContent = `Archivo seleccionado: ${f.name}`;
 
-  // Mostrar mensaje de "cargando" y spinner simulado
+  // Mostrar mensaje de "cargando"
   previewBox.innerHTML = `<div class="text-sm text-gray-600">Cargando archivo...</div>`;
 
-  // Simulación de subida (1.2s) antes de mostrar preview
+  // Simular carga antes de mostrar preview
   setTimeout(() => {
-    // Mostrar preview de vídeo
+    // Mostrar preview del video
     previewBox.innerHTML = `<video src="${URL.createObjectURL(f)}" controls class="w-full h-full object-cover"></video>`;
 
-    // Lanzar el análisis automáticamente después de mostrar preview
-    // (damos un pequeño delay para UX)
+    // Lanzar análisis automáticamente
     setTimeout(() => {
-      startAnalysis({ via: 'file', filename: f.name });
+      startAnalysis();
     }, 600);
   }, 1200);
 });
+
 
 // --- Si el usuario hace click en VERIFICAR sin haber seleccionado archivo ---
 // En ese caso, podemos abrir el selector también (mejora UX)
@@ -63,9 +63,8 @@ verifyBtn.addEventListener('click', () => {
   }
 });
 
-// --- Función principal: simula el análisis completo ---
-function startAnalysis(meta = {}) {
-  // reset UI
+function startAnalysis() {
+  // Reset
   resultArea.classList.add('hidden');
   progressArea.classList.remove('hidden');
   progressBar.style.width = '2%';
@@ -77,19 +76,18 @@ function startAnalysis(meta = {}) {
     progressBar.style.width = progress.toFixed(0) + '%';
   }, 300);
 
-  // Simulamos tiempo variable (más si viene archivo)
-  const fakeTime = meta.via === 'file' ? 2000 + Math.random() * 2200 : 1400 + Math.random() * 1800;
-
+  const fakeTime = 2000 + Math.random() * 2000;
   setTimeout(() => {
     clearInterval(interval);
     progressBar.style.width = '100%';
 
-    // Decisión: 90% deepfake, 10% original
+    // Decisión: 90% Deepfake, 10% Original
     const rnd = Math.random() * 100;
-    const isDeepfake = rnd < 90; // 90% deepfake
-    const conf = isDeepfake ? Math.floor(80 + Math.random() * 18) : Math.floor(65 + Math.random() * 25);
+    const isDeepfake = rnd < 90; 
+    const conf = isDeepfake 
+      ? Math.floor(80 + Math.random() * 18) 
+      : Math.floor(65 + Math.random() * 25);
 
-    // Mostrar resultado
     progressArea.classList.add('hidden');
     resultArea.classList.remove('hidden');
 
@@ -104,8 +102,5 @@ function startAnalysis(meta = {}) {
       resultConf.textContent = `Confianza estimada: ${conf}%`;
       resultMsg.textContent = 'El sistema considera el video auténtico (simulación).';
     }
-
-    // (Opcional) si quieres mostrar link de compartir, etc., lo podemos añadir aquí
   }, fakeTime);
 }
-
