@@ -10,16 +10,12 @@ const resultBadge = document.getElementById('resultBadge');
 const resultConf = document.getElementById('resultConf');
 const resultMsg = document.getElementById('resultMsg');
 
-// Background and cards
+// Hero background (optional)
 if (document.getElementById('heroBg')) {
   document.getElementById('heroBg').style.backgroundImage = "url('assets/hero.jpg')";
 }
-document.querySelectorAll('.card-hero').forEach(c=>{
-  const img = c.dataset.img || 'assets/img-placeholder.jpg';
-  c.style.backgroundImage = `url('${img}')`;
-});
 
-// Click on box → open file dialog
+// Click on visible box → open file input
 fakeInput.addEventListener('click', () => {
   fileInput.click();
 });
@@ -40,7 +36,7 @@ fileInput.addEventListener('change', (e) => {
   }, 1200);
 });
 
-// If user clicks VERIFY
+// Verify button
 verifyBtn.addEventListener('click', () => {
   if (fileInput.files && fileInput.files.length > 0) {
     startAnalysis();
@@ -68,7 +64,7 @@ function startAnalysis() {
     progressBar.style.width = '100%';
 
     const rnd = Math.random() * 100;
-    const isDeepfake = rnd < 90; // 90% deepfake
+    const isDeepfake = rnd < 90;
     const conf = isDeepfake 
       ? Math.floor(80 + Math.random() * 18) 
       : Math.floor(65 + Math.random() * 25);
@@ -89,3 +85,4 @@ function startAnalysis() {
     }
   }, fakeTime);
 }
+
