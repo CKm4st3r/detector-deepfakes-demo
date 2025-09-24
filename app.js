@@ -1,104 +1,72 @@
-const videoInput = document.getElementById('videoInput');
-const preview = document.getElementById('preview');
-const previewWrap = document.getElementById('previewWrap');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const resetBtn = document.getElementById('resetBtn');
-const progressWrap = document.getElementById('progressWrap');
+const linkInput = document.getElementById('linkInput');
+const fileInput = document.getElementById('fileInput');
+const verifyBtn = document.getElementById('verifyBtn');
+const previewBox = document.getElementById('previewBox');
+const progressArea = document.getElementById('progressArea');
 const progressBar = document.getElementById('progressBar');
-const resultWrap = document.getElementById('resultWrap');
+const resultArea = document.getElementById('resultArea');
 const resultBadge = document.getElementById('resultBadge');
-const resultText = document.getElementById('resultText');
-const confidence = document.getElementById('confidence');
-const copyUrlBtn = document.getElementById('copyUrlBtn');
-const simulateUploadBtn = document.getElementById('simulateUploadBtn');
-const uploadResult = document.getElementById('uploadResult');
+const resultConf = document.getElementById('resultConf');
+const resultMsg = document.getElementById('resultMsg');
 
-let currentFile = null;
-let lastResult = null;
-
-// Mostrar preview
-videoInput.addEventListener('change', e => {
+// Mostrar preview si suben archivo
+fileInput.addEventListener('change', (e)=>{
   const f = e.target.files[0];
-  if (!f) return;
-  currentFile = f;
-  const url = URL.createObjectURL(f);
-  preview.src = url;
-  previewWrap.classList.remove('hidden');
+  if(!f) return;
+  previewBox.innerHTML = `<video src="${URL.createObjectURL(f)}" controls class="w-full h-full object-cover"></video>`;
 });
 
-// Reset
-resetBtn.addEventListener('click', () => {
-  videoInput.value = '';
-  preview.src = '';
-  previewWrap.classList.add('hidden');
-  resultWrap.classList.add('hidden');
-  progressWrap.classList.add('hidden');
-  progressBar.style.width = '0%';
-  currentFile = null;
-  lastResult = null;
-  uploadResult.textContent = '';
-});
+// Click en input abre selector de archivo
+linkInput.addEventListener('click', ()=> fileInput.click());
 
-// Simulación de análisis
-analyzeBtn.addEventListener('click', () => {
-  if (!currentFile) return alert('Selecciona un video primero.');
+// Simulación análisis
+verifyBtn.addEventListener('click', ()=>{
+  if(!linkInput.value && !fileInput.files.length){
+    alert('Pega un enlace o selecciona un archivo primero.');
+    return;
+  }
 
-  progressWrap.classList.remove('hidden');
+  resultArea.classList.add('hidden');
+  progressArea.classList.remove('hidden');
   progressBar.style.width = '2%';
-  resultWrap.classList.add('hidden');
 
   let progress = 2;
-  const interval = setInterval(() => {
-    progress += Math.random() * 12;
-    if (progress >= 98) progress = 98;
-    progressBar.style.width = progress.toFixed(0) + '%';
+  const interval = setInterval(()=>{
+    progress += Math.random()*10;
+    if(progress >= 98) progress = 98;
+    progressBar.style.width = progress.toFixed(0)+'%';
   }, 300);
 
-  const fakeTime = 2000 + Math.random() * 2000;
-  setTimeout(() => {
+  const fakeTime = 2000 + Math.random()*2000;
+  setTimeout(()=>{
     clearInterval(interval);
     progressBar.style.width = '100%';
 
-    const isDeepfake = Math.random() < 0.4;
-    const conf = Math.floor(60 + Math.random() * 40);
+    const rnd = Math.random()*100;
+    const isDeepfake = rnd < 90; // 90% Deepfake
+    const conf = isDeepfake ? Math.floor(80+Math.random()*18) : Math.floor(65+Math.random()*25);
 
-    lastResult = { isDeepfake, conf };
+    progressArea.classList.add('hidden');
+    resultArea.classList.remove('hidden');
 
-    resultWrap.classList.remove('hidden');
-    progressWrap.classList.add('hidden');
-
-    if (isDeepfake) {
-      resultBadge.textContent = 'Deepfake (simulado)';
-      resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-red-100 text-red-800';
-      resultText.textContent = 'El video parece manipulado (resultado aleatorio).';
+    if(isDeepfake){
+      resultBadge.textContent = 'DEEPFAKE (simulado)';
+      resultBadge.className = 'deep inline-block px-4 py-2 rounded-full font-semibold text-white text-lg';
+      resultConf.textContent = `Confianza: ${conf}%`;
+      resultMsg.textContent = 'El sistema considera el video manipulado (simulación).';
     } else {
-      resultBadge.textContent = 'Legítimo (simulado)';
-      resultBadge.className = 'inline-block px-3 py-1 rounded-full font-semibold bg-green-100 text-green-800';
-      resultText.textContent = 'El video parece auténtico (resultado aleatorio).';
+      resultBadge.textContent = 'VIDEO ORIGINAL (simulado)';
+      resultBadge.className = 'ok inline-block px-4 py-2 rounded-full font-semibold text-white text-lg';
+      resultConf.textContent = `Confianza: ${conf}%`;
+      resultMsg.textContent = 'El sistema considera el video auténtico (simulación).';
     }
-    confidence.textContent = 'Confianza estimada: ' + conf + '%';
   }, fakeTime);
 });
 
-// Copiar URL con resultado
-copyUrlBtn.addEventListener('click', () => {
-  if (!lastResult) return alert('Primero analiza un video.');
-  const params = new URLSearchParams({
-    r: lastResult.isDeepfake ? 'deep' : 'legit',
-    c: lastResult.conf
-  });
-  const shareUrl = location.origin + location.pathname + '?' + params.toString();
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    alert('URL copiada al portapapeles');
-  });
+// Imagen de fondo y tarjetas
+document.getElementById('heroBg').style.backgroundImage = "url('assets/hero.jpg')";
+document.querySelectorAll('.card-hero').forEach(c=>{
+  const img = c.dataset.img || 'assets/img-placeholder.jpg';
+  c.style.backgroundImage = `url('${img}')`;
 });
 
-// Simular subida
-simulateUploadBtn.addEventListener('click', () => {
-  if (!lastResult) return alert('Primero analiza un video.');
-  uploadResult.textContent = 'Simulando subida...';
-  setTimeout(() => {
-    const fakeUrl = 'https://storage-demo.example/' + encodeURIComponent(currentFile?.name || 'video.mp4');
-    uploadResult.innerHTML = 'Archivo simulado en: <a href="' + fakeUrl + '" target="_blank" class="text-blue-600 underline">' + fakeUrl + '</a>';
-  }, 1000);
-});
