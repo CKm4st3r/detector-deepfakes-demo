@@ -1,12 +1,12 @@
 /* HERO background */
 #heroBg {
-  background-image: url('assets/hero.jpg'); /* cambia por tu imagen */
+  background-image: url('assets/hero.jpg'); /* change with your image */
   background-size: cover;
   background-position: center;
   filter: saturate(1.05);
 }
 
-/* Botón principal */
+/* Main button */
 .verify-btn {
   @apply rounded-full px-6 py-3 font-bold text-white;
   background: linear-gradient(90deg,#7c3aed,#ec4899);
@@ -18,13 +18,13 @@
   box-shadow: 0 8px 22px rgba(124,58,237,0.35);
 }
 
-/* Barra de progreso */
+/* Progress bar */
 #progressBar {
   background: linear-gradient(90deg,#06b6d4,#7c3aed);
   transition: width 250ms linear;
 }
 
-/* Badge resultados */
+/* Result badges */
 #resultBadge.deep {
   background: linear-gradient(90deg,#ef4444,#b91c1c);
 }
@@ -32,7 +32,7 @@
   background: linear-gradient(90deg,#10b981,#059669);
 }
 
-/* Tarjetas */
+/* Cards */
 .card-hero {
   height: 340px;
   border-radius: 8px;
