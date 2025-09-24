@@ -4,164 +4,125 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Detector de Deepfakes — Demo</title>
-  <link rel="stylesheet" href="style.css">
+
+  <!-- Tailwind para estilos rápidos -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-800 leading-relaxed">
-  <!-- HEADER -->
-  <header class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <h1 class="text-2xl font-bold">Detector de Deepfakes</h1>
-      <nav class="space-x-4 text-sm">
-        <a href="#dashboard" class="hover:underline">Dashboard</a>
-        <a href="#quienes" class="hover:underline">Quiénes somos</a>
-        <a href="#empresas" class="hover:underline">Empresas</a>
-        <a href="#hogar" class="hover:underline">Hogar</a>
-        <a href="#compra" class="hover:underline">Compra</a>
-        <a href="#planes" class="hover:underline">Planes y Precios</a>
-      </nav>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- HERO -->
+  <header class="relative h-[70vh] overflow-hidden">
+    <div class="absolute inset-0 bg-cover bg-center" id="heroBg"></div>
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 h-full flex items-center">
+      <div class="text-white max-w-3xl">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">DETECTOR DE DEEPFAKES</h1>
+        <p class="mt-4 text-lg md:text-xl text-white/80">Comprueba la autenticidad de un video en segundos. (Demo de simulación)</p>
+        <div class="mt-8">
+          <a href="#verificador" class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-6 py-3 font-semibold shadow-lg hover:scale-[1.02] transition">Comprobar ahora</a>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="max-w-6xl mx-auto px-6 py-10">
-    <!-- DASHBOARD -->
-    <section id="dashboard" class="mb-12">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Demo: Subir video para análisis</h2>
-        <p class="text-sm text-gray-600 mb-4">
-          Este sitio es una demostración. No realiza análisis reales; la respuesta se genera aleatoriamente para mostrar la interfaz.
-        </p>
+  <!-- VERIFICADOR -->
+  <main class="max-w-6xl mx-auto px-6 -mt-16 relative z-20">
+    <section id="verificador" class="bg-white rounded-3xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl font-bold text-center">Verifica un video</h2>
+      <p class="text-sm text-gray-600 text-center mt-1">Pega un enlace o sube un archivo. Resultados simulados.</p>
 
-        <div class="grid md:grid-cols-2 gap-6 items-start">
-          <!-- Columna izquierda -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona un video</label>
-            <input id="videoInput" type="file" accept="video/*" class="block w-full text-sm text-gray-600" />
+      <div class="mt-8 flex flex-col md:flex-row gap-4 items-center">
+        <input id="linkInput" placeholder="Pega aquí un enlace o selecciona un archivo"
+               class="flex-1 rounded-full py-4 px-6 placeholder:text-gray-400 border-0 shadow-inner focus:outline-none"/>
+        <input id="fileInput" type="file" accept="video/*" class="hidden"/>
+        <button id="verifyBtn" class="verify-btn">VERIFICAR</button>
+      </div>
 
-            <div id="previewWrap" class="mt-4 hidden">
-              <video id="preview" controls class="w-full rounded-lg shadow-sm"></video>
-            </div>
+      <!-- Panel de resultado -->
+      <div class="mt-6">
+        <div id="previewBox" class="h-44 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+          <span class="text-xs text-gray-500">Previsualización del video (si subes uno)</span>
+        </div>
 
-            <div class="mt-4 flex gap-3">
-              <button id="analyzeBtn" class="btn-primary">Analizar</button>
-              <button id="resetBtn" class="btn-secondary">Reset</button>
-            </div>
-
-            <div id="progressWrap" class="mt-4 hidden">
-              <div class="text-sm text-gray-600 mb-2">Analizando...</div>
-              <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                <div id="progressBar" class="h-3 rounded-full transition-all"></div>
-              </div>
-            </div>
-
-            <div id="resultWrap" class="mt-6 hidden p-4 rounded-lg border">
-              <div id="resultBadge" class="inline-block px-3 py-1 rounded-full font-semibold"></div>
-              <p id="resultText" class="mt-2 text-sm"></p>
-              <div id="confidence" class="mt-2 text-xs text-gray-600"></div>
-
-              <div class="mt-4 flex gap-2">
-                <button id="copyUrlBtn" class="btn-secondary">Copiar URL</button>
-                <button id="simulateUploadBtn" class="btn-secondary">Simular subida</button>
-              </div>
-              <div id="uploadResult" class="mt-3 text-xs text-gray-600"></div>
-            </div>
+        <div id="progressArea" class="mt-4 hidden">
+          <div class="text-sm text-gray-600 mb-2">Analizando…</div>
+          <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-3 rounded-full" style="width:0%"></div>
           </div>
+        </div>
 
-          <!-- Columna derecha -->
-          <div class="bg-gray-50 p-4 rounded-lg border">
-            <h3 class="font-medium">Cómo funciona (demo)</h3>
-            <ul class="mt-2 text-sm text-gray-600 list-disc pl-5 space-y-1">
-              <li>Sube un video (no se envía a ningún servidor).</li>
-              <li>Pulsa <strong>Analizar</strong> para ver la simulación.</li>
-              <li>El resultado es aleatorio (Deepfake o Legítimo).</li>
-            </ul>
-          </div>
+        <div id="resultArea" class="mt-4 hidden text-center">
+          <div id="resultBadge" class="inline-block px-4 py-2 rounded-full font-semibold text-white text-lg"></div>
+          <div id="resultConf" class="mt-2 text-sm text-gray-600"></div>
+          <div id="resultMsg" class="mt-3 text-sm"></div>
         </div>
       </div>
     </section>
 
-    <!-- SECCIONES EXTRAS -->
-    <section id="quienes" class="mb-8">
-      <h3 class="section-title">Quiénes somos</h3>
-      <p class="section-box">Somos un equipo demo que explora ideas de detección de contenido manipulado.</p>
-    </section>
-
-    <section id="empresas" class="mb-8">
-      <h3 class="section-title">Empresas</h3>
-      <p class="section-box">Ofrecemos integraciones de prueba para empresas interesadas en detectar deepfakes.</p>
-    </section>
-
-    <section id="hogar" class="mb-8">
-      <h3 class="section-title">Hogar</h3>
-      <p class="section-box">Soluciones para usuarios domésticos: comprobar rápidamente vídeos compartidos.</p>
-    </section>
-
-    <section id="compra" class="mb-8">
-      <h3 class="section-title">Compra</h3>
-      <p class="section-box">En la versión real se podrían ofrecer servicios por suscripción.</p>
-    </section>
-
-    <section id="planes" class="mb-12">
-      <h3 class="section-title">Planes y Precios</h3>
-      <div class="grid md:grid-cols-3 gap-4">
-        <div class="card">Free (Demo)<br><span class="price">Gratis</span></div>
-        <div class="card">Starter<br><span class="price">€9 / mes</span></div>
-        <div class="card">Empresa<br><span class="price">Contactar</span></div>
-      </div>
+    <!-- TARJETAS -->
+    <section class="mt-16 grid md:grid-cols-3 gap-6">
+      <article class="card-hero" data-img="assets/img1.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">Soluciones AI</h3>
+          <p class="text-white/90 mt-2 text-sm">Texto descriptivo editable.</p>
+        </div>
+      </article>
+      <article class="card-hero" data-img="assets/img2.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">Proyectos</h3>
+          <p class="text-white/90 mt-2 text-sm">Texto descriptivo editable.</p>
+        </div>
+      </article>
+      <article class="card-hero" data-img="assets/img3.jpg">
+        <div class="card-overlay">
+          <h3 class="text-white text-xl font-bold">Investigación</h3>
+          <p class="text-white/90 mt-2 text-sm">Texto descriptivo editable.</p>
+        </div>
+      </article>
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="text-center text-xs text-gray-500 py-6">
-    Demo — Esta página no realiza análisis reales. © Detecto de Deepfakes
+  <!-- FOOTER CORPORATIVO -->
+  <footer class="bg-gray-900 text-gray-300 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-white text-xl font-bold">Detector Deepfakes</h3>
+        <p class="mt-3 text-sm text-gray-400">Demo corporativa para mostrar detección de deepfakes. Resultados simulados.</p>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3">Navegación</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#verificador" class="hover:underline">Verificador</a></li>
+          <li><a href="#planes" class="hover:underline">Planes</a></li>
+          <li><a href="#contacto" class="hover:underline">Contacto</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3">Recursos</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:underline">Blog</a></li>
+          <li><a href="#" class="hover:underline">Investigación</a></li>
+          <li><a href="#" class="hover:underline">FAQs</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold mb-3">Contacto</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="mailto:info@tudemo.com" class="hover:underline">info@tudemo.com</a></li>
+          <li><a href="#" class="hover:underline">LinkedIn</a></li>
+          <li><a href="#" class="hover:underline">Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 text-center py-4 text-xs text-gray-500">
+      © 2025 Detector Deepfakes — Demo corporativa. Todos los derechos reservados.
+    </div>
   </footer>
 
   <script src="app.js"></script>
 </body>
-
-  <footer class="footer">
-  <div class="footer-container">
-    
-    <!-- Logo -->
-    <div class="footer-logo">
-      <img src="tu-logo.png" alt="Mi Proyecto" />
-      <h2>Mi Proyecto AI</h2>
-    </div>
-
-    <!-- Secciones -->
-    <div class="footer-links">
-      <div>
-        <h3>About Us</h3>
-        <a href="#">Home</a><br>
-        <a href="#">Meet the Team</a>
-      </div>
-      <div>
-        <h3>Our Work</h3>
-        <a href="#">AI for Good</a><br>
-        <a href="#">Our Offerings</a>
-      </div>
-      <div>
-        <h3>Insights</h3>
-        <a href="#">Research</a><br>
-        <a href="#">Blog</a>
-      </div>
-      <div>
-        <h3>ESGs & SDGs</h3>
-        <a href="#">FAQs</a>
-      </div>
-      <div>
-        <h3>Contact</h3>
-        <a href="#">Get a Quote</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Copyright -->
-  <div class="footer-bottom">
-    <p>© 2025 Mi Proyecto AI | Privacy Policy</p>
-  </div>
-</footer>
-
 </html>
+
 
